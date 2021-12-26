@@ -10,21 +10,38 @@ selection = []
 try:
     word_pairs = pd.read_csv("./data/words_to_learn.csv")
     word_list = word_pairs.to_dict('records')
+    words_to_learn = word_list
 except FileNotFoundError:
     word_pairs = pd.read_csv('./data/french_words.csv')
     word_list = word_pairs.to_dict('records')
     words_to_learn = word_list
-    print(word_list)
+    print(len(word_list))
 
 
 # ______________________________Get random key:value from list of dictionaries__________________________________________
 def random_select():
     global selection
     selection = random.choice(word_list)
+
     canvas.itemconfig(canvas_image, image=front_img)
     lang_label.config(text='French', bg='white', fg='black')
     word_label.config(text=selection['French'], bg='white', fg='black')
     window.after(3000, func=flip)
+
+
+def known():
+    global selection
+    words_to_learn.remove(selection)
+    print(len(words_to_learn))
+    print(len(word_list))
+    print('known has executed')
+    to_df = pd.DataFrame(words_to_learn)
+    to_df.to_csv('./data/words_to_learn.csv', index=False)
+
+
+def random_known():
+    known()
+    random_select()
 
 
 def flip():
@@ -48,12 +65,6 @@ wrong_img = PhotoImage(file='./images/wrong.png')
 canvas_image = canvas.create_image(400, 263, image=front_img)
 canvas.grid(row=0, column=0, columnspan=2, rowspan=3)
 
-right_button = Button(image=right_img, highlightthickness=0, command=random_select)
-right_button.grid(row=3, column=1)
-
-wrong_button = Button(image=wrong_img, highlightthickness=0, command=random_select)
-wrong_button.grid(row=3, column=0)
-
 lang_label = Label(text='Language', bg='white')
 lang_label.config(font=('arial', 40, 'italic'))
 lang_label.grid(row=0, column=0, columnspan=2)
@@ -61,6 +72,12 @@ lang_label.grid(row=0, column=0, columnspan=2)
 word_label = Label(text='Word', bg='white')
 word_label.config(font=('arial', 60, 'bold'))
 word_label.grid(row=1, column=0, columnspan=2)
+
+right_button = Button(image=right_img, highlightthickness=0, command=random_known)
+right_button.grid(row=3, column=1)
+
+wrong_button = Button(image=wrong_img, highlightthickness=0, command=random_select)
+wrong_button.grid(row=3, column=0)
 
 random_select()
 
